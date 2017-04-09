@@ -14,13 +14,20 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~ssSet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int simpleSet(char *MachineName, int TCPport, int SecretKey, char *variableName, char *value, int dataLength)
 {
-    return 0;
+    return 1;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssGet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+int simpleGet(char *MachineName, int TCPport, int SecretKey, char *variableName, char *value, int *resultLength)
+{
+    return 1;
+}
 
 
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int main(int argc, const char * argv[])
 {
     const int LISTEN_PORT = atoi(argv[1]);                                      //converts port to int (MIGHT CHANGE TO LONG)!!!!
@@ -59,6 +66,15 @@ int main(int argc, const char * argv[])
             perror("accept error");
         }
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
         unsigned long Password;
         char * Request;                                                         //store Request type
         char * Detail;                                                          //store Details
@@ -69,6 +85,7 @@ int main(int argc, const char * argv[])
         fprintf(stdout, "Detail = %s \n", Detail);                              //displays Details provided by client
         fprintf(stdout, "Completion = %s \n", Status);
         fprintf(stdout, "-------------------------- \n");
+        Close(connfd);                                                          //closes connection to client
         
         fprintf(stdout, "Port number %d  SecretKey %ld \n", LISTEN_PORT ,SECRET_KEY);       //DELETE!!!!!!!!!!!!!!!!!!!!
 
