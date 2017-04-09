@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
 	// Update the host and port variables with their values from ARGV
 	host = argv[1];
 	port = atoi(argv[2]);
-	name = argv[4];
-	value = argv[5];
+	*name = argv[4];
+	*value = argv[5];
 
 	// Create file descriptor to the server
 	toserverfd = open_clientfd(host, port);
@@ -44,12 +44,12 @@ int main(int argc, char *argv[])
 	Rio_readinitb(&rio, toserverfd);
 
 	// Send to the server
-	Rio_writen(toserverfd, *name, strlen(name));
-	Rio_writen(toserverfd, *value, strlen(value));
+	Rio_writen(toserverfd, *name, strlen(*name));
+	Rio_writen(toserverfd, *value, strlen(*value));
 
 	// From the server
 	Rio_readlineb(&rio, *name, MAXLINE);
-	Fputs(name, stdout);
+	Fputs(*name, stdout);
 
 	Close(toserverfd);
 	exit(0);

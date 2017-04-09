@@ -35,10 +35,10 @@ int main(int argc, char *argv[])
 	// Ready for I/O
 	Rio_readinitb(&rio, toserverfd);
 
-	buf = argv[4];
+	*buf = argv[4];
 
 	// Send buffer to the server
-	Rio_writen(toserverfd, *buf, strlen(buf));
+	Rio_writen(toserverfd, *buf, strlen(*buf));
 	// to server
 	Rio_readn(&rio, *buf, MAXLINE);
 	// from server
