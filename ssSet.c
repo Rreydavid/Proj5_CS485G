@@ -14,20 +14,28 @@ int main(int argc, char *argv[])
 	int toserverfd;
 	int port;
 	char *host;
-	char *buf[MAXLINE];
+	char *name[MAXLINE];
+	char *value[MAXLINE];
 	rio_t rio;
 
 	// Check for proper amount of command line arguments
 	if(argc != 6)
 	{
 		// If not 6 command line arguments, output to stderr with usage and values that were input.
-        fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <VariableName> %, <Value> %s \n ", argv[1], argv[2], argv[3], argv[4], argv[5]);
+        fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <VariableName> %s, <Value> %s \n ", argv[1], argv[2], argv[3], argv[4], argv[5]);
         exit(0);
+	}
+	else if(sizeof(argv[5]) > 100)
+	{
+		fprintf(stderr, "The value to be set must not exceed 100 bytes.");
+		exit(0);
 	}
 
 	// Update the host and port variables with their values from ARGV
 	host = argv[1];
 	port = atoi(argv[2]);
+	name = argv[4];
+	value = argv[5];
 
 	// Create file descriptor to the server
 	toserverfd = open_clientfd(host, port);
@@ -35,22 +43,14 @@ int main(int argc, char *argv[])
 	// Ready for I/O
 	Rio_readinitb(&rio, toserverfd);
 
-	// Get input
-	printf("type: "); 
-	fflush(stdout);
+	// Send to the server
+	Rio_writen(toserverfd, *name, strlen(name));
+	Rio_writen(toserverfd, *value, strlen(value));
 
-	while (Fgets(buf, MAXLINE, stdin) != NULL) 
-	{
-		// more input
-		Rio_writen(toserverfd, buf, strlen(buf));
-		// to server
-		Rio_readlineb(&rio, buf, MAXLINE);
-		// from server
-		Fputs(buf, stdout);
-		printf("type: "); 
-		fflush(stdout);
-	}
+	// From the server
+	Rio_readlineb(&rio, *name, MAXLINE);
+	Fputs(name, stdout);
 
-	close(toserverfd);
+	Close(toserverfd);
 	exit(0);
 }
