@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	// Check for proper amount of command line arguments
 	if(argc != 6)
 	{
-		// If not 
+		// If not 6 command line arguments, output to stderr with usage and values that were input.
         fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <VariableName> %, <Value> %s \n ", argv[1], argv[2], argv[3], argv[4], argv[5]);
         exit(0);
 	}
