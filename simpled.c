@@ -26,6 +26,10 @@ int main(int argc, const char * argv[])
         fprintf(stderr, "Incorrect Port or SecretKey Range!!: <port> %d <SecretKey> %ld \n ", Port, SecretKey);
         exit(0);
     }
+    struct sockaddr_in clientAddr;
+    struct hostent *clientHostEntry;
+    char *clientIP;
+    unsigned short clientPort;
     
     
     
@@ -39,7 +43,7 @@ int main(int argc, const char * argv[])
     
     
     
-    // BLAH BLAH BLAH, donkey wins.
+    
     
     
 
