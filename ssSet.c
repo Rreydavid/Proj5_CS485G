@@ -14,11 +14,13 @@ int main(int argc, char *argv[])
     const int MAX_REQUEST_BUFF = 128;                                           // Declare Variables
 	char *host;
     int port;
+    unsigned int ValueLength;
+    unsigned int ValueLengthNet;
     unsigned long SecretKey;
     unsigned long SecretKeyNet;
     char *SetRequest[MAX_REQUEST_BUFF] = {NULL};
-    char *VariableName[MAXLINE];                                                //DELETE!!!!!!!!!!
-	char *VariableValue[MAXLINE];                                               //DELETE!!!!!!!!!!
+    char *SecretKeyString[MAXLINE];
+	char *ValueLengthString[MAXLINE];
     int toserverfd;
 	rio_t rio;
     
@@ -38,13 +40,14 @@ int main(int argc, char *argv[])
 //------------------------------------------------------------------------------
 	host = argv[1];                                                             // set argv values into usable variables
 	port = atoi(argv[2]);
+    
     SecretKey = atoi(argv[3]);                                                  //converts string secret key to unsigned long
     SecretKeyNet = htonl(SecretKey);                                            //converts secretkey to network order
+    ValueLength = sizeof(argv[5]);                                              //get size of value
+    ValueLengthNet = htonl(ValueLength);                                        //converts value length to network order
     
-    
-    *VariableName = argv[4];
-	*VariableValue = argv[5];
-    
+    *SecretKeyString = SecretKeyNet;                                                 //converts network order secretKey back to char
+    *ValueLengthString = ValueLengthNet;                                               //converts network order value length back to char
     
     SetRequest[0] = argv[0];                                //Bytes 0-3: A 4-byte unsigned integer containing SecretKey in network byte order
     SetRequest[4] = 0;                                      //Byte 4: A 1-byte unsigned integer containing the type of request: set (0)
@@ -52,7 +55,14 @@ int main(int argc, char *argv[])
     SetRequest[24] = argv[0];                        //Bytes 24-27: A 4-byte unsigned integer (in network order) giving the length of the value
     SetRequest[28] = argv[5];           //Bytes 28 ..: The value itself. The client need not send any more than the number of bytes required.
     
+
     
+    
+    
+
+    
+    
+//------------------------------------------------------------------------------
     toserverfd = Open_clientfd(host, port);                                     //Create file descriptor to the server, using wrapper
 	// Ready for I/O
     Rio_readinitb(&rio, toserverfd);                                            //Associate a toserverfd with a read buffer and reset buffer
