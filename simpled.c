@@ -61,11 +61,7 @@ int main(int argc, const char * argv[])
     while(1)                                                                    //continously listening for clients
     {
         connfd = Accept(listenfd, (SA *)&clientAddr, &addrLength);              //accepts and creates a file descriptor for this connection
-        if(connfd < 1)
-        {
-            perror("accept error");
-        }
-        
+
         
         
         

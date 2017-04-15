@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 	*name = argv[4];
 	*value = argv[5];
 
-	// Create file descriptor to the server
-	toserverfd = open_clientfd(host, port);
+	
+    toserverfd = Open_clientfd(host, port);       //Create file descriptor to the server, using wrapper
 
 	// Ready for I/O
 	Rio_readinitb(&rio, toserverfd);
