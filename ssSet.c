@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     FirstEightBytes[1]= 0;                             //Byte 4: A 1-byte unsigned integer containing the type of request: set (0)
     memcpy(SecondFifthteenBytes, argv[4], 14);              //Bytes 8-23: a null-terminated variable name, no longer than 15 characters.
     ThirdForthBytes[0] = htonl(ValueLength);        //Bytes 24-27: A 4-byte unsigned integer containing length of value in network order
-    memcpy(Last100Bytes, argv[5], 99);                                          //Bytes 28 ..: The value itself.
+    memcpy(Last100Bytes, argv[5], 99);                                          //Bytes 28 - Bytes....: The value itself.
 
 //------------------------------------------------------------------------------
     toserverfd = Open_clientfd(host, port);                              //Create file descriptor to the server, using wrapper
@@ -57,8 +57,9 @@ int main(int argc, char *argv[])
     Rio_writen(toserverfd, Last100Bytes, sizeof(Last100Bytes));
 	
 //------------------------------------------------------------------------------
-//Rio_readnb(&rio, *VariableName, 1);                                         // From the server
-    //	Fputs(*VariableName, stdout);
+    bzero((char *) &SecondFifthteenBytes, sizeof(SecondFifthteenBytes));        //clear out buffer
+    Rio_readn(&rio, SecondFifthteenBytes, 1);                                    // From the server
+    Fputs(SecondFifthteenBytes, stdout);
 
 	Close(toserverfd);
 	exit(0);
