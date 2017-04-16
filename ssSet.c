@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     unsigned long SecretKey;
     int FirstEightBytes[2];
     char *SecondFifthteenBytes[15] = {NULL};
-    int ThirdForthBytes[1];
+    unsigned int ThirdForthBytes[1];
     char *Last100Bytes[100] = {NULL};
     int toserverfd;
 	rio_t rio;
@@ -39,12 +39,13 @@ int main(int argc, char *argv[])
 	host = argv[1];                                                             // set argv values into usable variables
     port = atoi(argv[2]);                                                       //converts port to int
     SecretKey = atoi(argv[3]);                                                  //converts string secret key to unsigned long
-    ValueLength = sizeof(argv[5]);                                              //get size of value
-
+    ValueLength = strlen(argv[5]);                                              //get size of value
+    printf("Length of value before network order: %d\n",ValueLength);           //DELETE!!!!!!!!!!!!!!!!
     FirstEightBytes[0] = htonl(SecretKey);              //Bytes 0-3: A 4-byte unsigned integer containing SecretKey in network byte order
     FirstEightBytes[1]= 0;                             //Byte 4: A 1-byte unsigned integer containing the type of request: set (0)
     memcpy(SecondFifthteenBytes, argv[4], 14);              //Bytes 8-23: a null-terminated variable name, no longer than 15 characters.
     ThirdForthBytes[0] = htonl(ValueLength);        //Bytes 24-27: A 4-byte unsigned integer containing length of value in network order
+    printf("length of value in network order: %d\n", ThirdForthBytes[0]);       //DELETE!!!!!!!!!!!!!!!!
     memcpy(Last100Bytes, argv[5], 99);                                          //Bytes 28 - Bytes....: The value itself.
 
 //------------------------------------------------------------------------------
@@ -52,10 +53,13 @@ int main(int argc, char *argv[])
     Rio_readinitb(&rio, toserverfd);                                         //Associate a toserverfd with a read buffer and reset buffer
     
     Rio_writen(toserverfd, FirstEightBytes, sizeof(FirstEightBytes));           // Send to the server secret key and type request
-    Rio_writen(toserverfd, SecondFifthteenBytes, sizeof(SecondFifthteenBytes)); // Send variable name
+    Rio_writen(toserverfd, SecondFifthteenBytes, 15); // Send variable name
     Rio_writen(toserverfd, ThirdForthBytes, sizeof(ThirdForthBytes));           // send length of value for variable
-    Rio_writen(toserverfd, Last100Bytes, sizeof(Last100Bytes));                 // Sends value of variable
-	
+    Rio_writen(toserverfd, Last100Bytes, 100);                 // Sends value of variable
+    printf("size of FirstEightBytes: %lu\n", sizeof(FirstEightBytes));          //DELETE!!!!!!!!!!!!!!!!
+        printf("size of SecondFifthteenBytes: %d\n", 15);                       //DELETE!!!!!!!!!!!!!!!!
+        printf("size of ThirdForthBytes: %lu\n", sizeof(ThirdForthBytes));      //DELETE!!!!!!!!!!!!!!!!
+        printf("size of Last100Bytes: %d\n", 100);                              //DELETE!!!!!!!!!!!!!!!!
 //------------------------------------------------------------------------------
     Close(toserverfd);                                                          //close connection
 	exit(0);

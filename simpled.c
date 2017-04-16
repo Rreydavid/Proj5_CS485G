@@ -10,14 +10,50 @@
 #include <stdlib.h>     //for atoi
 #include "csapp.h"      //for sockets and what not
 
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~ssSet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-int simpleSet(char *MachineName, int TCPport, int SecretKey, char *variableName, char *value, int dataLength)
+//~~~~~~~~~~~~~~~~~~~~PRINT MENU~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void PrintMenu(int SecretKey, char *Type, char *VariableName, char *Status)
 {
-    return 1;
+    fprintf(stdout, "Secret Key = %d \n", SecretKey);                           //displays SecretKey provided by client
+    fprintf(stdout, "Request type = %s \n", Type);                              //displays Request type provided by client
+    fprintf(stdout, "Detail = %s \n", VariableName);                            //displays Details provided by client
+    fprintf(stdout, "Operation Status = %s \n", Status);                        //displays sucess or failure
+    fprintf(stdout, "-------------------------- \n");
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~Search~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+int Search(char *Record[MAXLINE], char *VariableName)
+{
+    int pos;
+    
+    for(pos = 0; pos < MAXLINE; pos += 2)
+    {
+        if(Record[pos] == NULL)
+        {
+            return -1;
+        }
+        else if(Record[pos] == VariableName)
+        {
+            return pos+1;
+        }
+    }
+    return -1;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~Insert~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+int Insert(char *Record[MAXLINE], int *RecordCount, char *VariableName, char *VariableValue, int pos)
+{
+    int
+    if(pos == -1)
+    {
+        Record[RecordCount] = VariableName;
+        Record[RecordCount+1] = VariableValue;
+        &RecordCount += 2;
+    }
+    else if (pos )
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssGet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int simpleGet(char *MachineName, int TCPport, int SecretKey, char *variableName, char *value, int *resultLength)
 {
@@ -28,14 +64,14 @@ int simpleGet(char *MachineName, int TCPport, int SecretKey, char *variableName,
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 int main(int argc, const char * argv[])
 {
     const int LISTEN_PORT = atoi(argv[1]);                                      //converts port to int (MIGHT CHANGE TO LONG)!!!!
     const unsigned long SECRET_KEY = atoi(argv[2]);                             //converts SecretKey to unsigned long
     const unsigned long LIMIT = 4294967296;                                     //(2^32-1) limit for SecretKey
-    const int ROW = 50;                                                         
-    const int COLUMN = 2;
-
+    
+//------------------------------------------------------------------------------
     if(argc != 3)                                                               //checks for correct parameters
     {
         fprintf(stderr, "Incorrect number of parameters: <port> %s <SecretKey> %s \n ", argv[1], argv[2]);
@@ -47,44 +83,93 @@ int main(int argc, const char * argv[])
         exit(0);
     }
     
-    char *Record[ROW][COLUMN];                                                  //Initalized 2 deminsional array to hold variables
+//------------------------------------------------------------------------------
+    int SecretKeyNet[1];                                                        // Declare Variables
+    int TypeRequest[1];
+    char *VariableName[15] = {NULL};
+    int ValueLengthNet[1];
+    char *VariableValue[100] = {NULL};
+    char *Type;
+    char *Status;
+    char *Record[MAXLINE]= {NULL};                                              //Initalized array to hold variables and values
+    int RecordCount;
+    int pos;
+    int Sitrep;
     int listenfd;                                                               //for listening socket
     int connfd;                                                                 //for accept
     struct sockaddr_in clientAddr;                                              //socket address structure for the internet
-    struct hostent *clientHostEntry;                                            //used to represent an entry in the hosts database
-    char *clientIP;                                                             //for clients IP address
-    unsigned short clientPort;                                                  //for clients port number
+    //    struct hostent *clientHostEntry;                                            //used to represent an entry in the hosts database
+    rio_t rio;
     
-    listenfd = open_listenfd(LISTEN_PORT);                                      //open and return a listening socket on port (bind)
+    listenfd = Open_listenfd(LISTEN_PORT);                                      //open and return a listening socket on port (bind)
     socklen_t addrLength = sizeof(clientAddr);                                  //holds the length of the clients address
-
+    
+//------------------------------------------------------------------------------
     while(1)                                                                    //continously listening for clients
     {
         connfd = Accept(listenfd, (SA *)&clientAddr, &addrLength);              //accepts and creates a file descriptor for this connection
+        
+        Rio_readinitb(&rio,connfd);                                             //Creates internal buffer
+        Rio_readnb(&rio,(void*)&SecretKeyNet, 4);                               //Reads Secret Key
+        int SK = ntohl(SecretKeyNet[0]);                                        //Converts from Network order to host
 
+        Rio_readnb(&rio, (void*)&TypeRequest, 4);                               //Reads request type (ssSet, ssGet...)
         
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if(SK != SECRET_KEY)
+        {
+            fprintf(stdout, "Secret Key = %d \n", SK);                          //displays SecretKey provided by client
+            Close(connfd);                                                      //closes connection to client
+            continue;
+        }
         
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if (TypeRequest[0] == 0)                                           //for ssSet client
+        {
+            Type = "set";
+            Rio_readnb(&rio,VariableName, 15);                                  //reads in variable name
+
+            Rio_readnb(&rio,(void*)&ValueLengthNet, 4);                         //Reads Variable length
+            fprintf(stdout, "Value Length[0] = %d \n", ValueLengthNet[0]);      //DELETE!!!!!!!!!!!!!!!!
+            fprintf(stdout, "Value Length before conversion = %d \n", ValueLengthNet);  //DELETE!!!!!!!!!!!!!!!!
+            int VL = ntohl(ValueLengthNet[0]);                                  //Converts variable length from network to host
+             fprintf(stdout, "Value Length after conversion = %d \n", VL);      //DELETE!!!!!!!!!!!!!!!!
+            
+            Rio_readnb(&rio,VariableValue, VL);                                 //reads in variable value
+            printf("Variable Value %s\n", VariableValue);                       //DELETE!!!!!!!!!!!!!!!!
+
+            pos = Search(&Record[MAXLINE], VariableName);
+            
+            if(pos == -1)
+            {
+                Sitrep = Insert(&Record[MAXLINE], &RecordCount, VariableName, VariableValue, pos);  //add to end of array
+            }
+            else
+            {
+                Sitrep = Insert(&Record[MAXLINE], &RecordCount, VariableName, VariableValue, pos);  //replace current value
+            }
         
+            
+            if(Sitrep == -1)
+            {
+                Status = "Failure";
+            }
+            else
+            {
+                Status = "Success";
+            }
+            
+            PrintMenu(SK, Type, VariableName, Status);                          //prints menu
+        }
         
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if (TypeRequest[0] == 1)                                           //for ssGet client
+        {
+            printf("Not ready yet");
+
+        }
         
-        
-        
-        
-        
-        unsigned long Password;
-        char * Request;                                                         //store Request type
-        char * Detail;                                                          //store Details
-        char * Status;                                                          //store if its successful or not
-        
-        fprintf(stdout, "Secret Key = %ld \n", Password);                       //displays SecretKey provided by client
-        fprintf(stdout, "Request type = %s \n", Request);                       //displays Request type provided by client
-        fprintf(stdout, "Detail = %s \n", Detail);                              //displays Details provided by client
-        fprintf(stdout, "Completion = %s \n", Status);
-        fprintf(stdout, "-------------------------- \n");
         Close(connfd);                                                          //closes connection to client
-        
-        fprintf(stdout, "Port number %d  SecretKey %ld \n", LISTEN_PORT ,SECRET_KEY);       //DELETE!!!!!!!!!!!!!!!!!!!!
-
     }
     return 0;
 }
