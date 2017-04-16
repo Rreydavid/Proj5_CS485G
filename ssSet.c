@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     char *Last100Bytes[100] = {NULL};
     int toserverfd;
 	rio_t rio;
+    char *Report[MAXLINE];
     
 //------------------------------------------------------------------------------
 	if(argc != 6)                                                               // Check for proper amount of command line arguments
@@ -50,17 +51,22 @@ int main(int argc, char *argv[])
 //------------------------------------------------------------------------------
     toserverfd = Open_clientfd(host, port);                              //Create file descriptor to the server, using wrapper
     Rio_readinitb(&rio, toserverfd);                                    //Associate a toserverfd with a read buffer and reset buffer
-	
     Rio_writen(toserverfd, FirstEightBytes, sizeof(FirstEightBytes));           // Send to the server
     Rio_writen(toserverfd, SecondFifthteenBytes, sizeof(SecondFifthteenBytes));
     Rio_writen(toserverfd, ThirdForthBytes, sizeof(ThirdForthBytes));
     Rio_writen(toserverfd, Last100Bytes, sizeof(Last100Bytes));
 	
 //------------------------------------------------------------------------------
-    bzero((char *) &SecondFifthteenBytes, sizeof(SecondFifthteenBytes));        //clear out buffer
-    Rio_readn(&rio, SecondFifthteenBytes, 1);                                    // From the server
-    Fputs(SecondFifthteenBytes, stdout);
-
-	Close(toserverfd);
+    printf("Made it this far!!\n");
+        //rio_readnb(&rio, Report, MAXLINE);                                    // From the server
+        //fflush(stdout);
+    size_t n;
+    while((n = Rio_readn(toserverfd, Report, MAXLINE)) != 0) { //line:netp:echo:eof
+        printf("server received %d bytes\n", (int)n);
+    }
+    
+        //rio_readlineb(&rio, Report, MAXLINE);
+    printf("Report %s\n", *Report);
+      Close(toserverfd);
 	exit(0);
 }
