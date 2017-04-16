@@ -21,18 +21,17 @@ int main(int argc, char *argv[])
     char *Last100Bytes[100] = {NULL};
     int toserverfd;
 	rio_t rio;
-    char *Report[MAXLINE];
     
 //------------------------------------------------------------------------------
 	if(argc != 6)                                                               // Check for proper amount of command line arguments
 	{
 		// If not 6 command line arguments, output to stderr with usage and values that were input.
-        fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <VariableName> %s, <Value> %s \n ", argv[1], argv[2], argv[3], argv[4], argv[5]);
+        fprintf(stderr, "Usage: ./ssSet host port secret variableName value\n");
         exit(0);
 	}
     else if(sizeof(argv[5]) > 100)                                              //If Variable value exceeds 100 bytes
 	{
-		fprintf(stderr, "The value to be set must not exceed 100 bytes.");
+		fprintf(stderr, "The value to be set must not exceed 100 bytes.\n");
 		exit(0);
 	}
     
@@ -49,24 +48,15 @@ int main(int argc, char *argv[])
     memcpy(Last100Bytes, argv[5], 99);                                          //Bytes 28 - Bytes....: The value itself.
 
 //------------------------------------------------------------------------------
-    toserverfd = Open_clientfd(host, port);                              //Create file descriptor to the server, using wrapper
-    Rio_readinitb(&rio, toserverfd);                                    //Associate a toserverfd with a read buffer and reset buffer
-    Rio_writen(toserverfd, FirstEightBytes, sizeof(FirstEightBytes));           // Send to the server
-    Rio_writen(toserverfd, SecondFifthteenBytes, sizeof(SecondFifthteenBytes));
-    Rio_writen(toserverfd, ThirdForthBytes, sizeof(ThirdForthBytes));
-    Rio_writen(toserverfd, Last100Bytes, sizeof(Last100Bytes));
+    toserverfd = Open_clientfd(host, port);                                     //Create file descriptor to the server, using wrapper
+    Rio_readinitb(&rio, toserverfd);                                         //Associate a toserverfd with a read buffer and reset buffer
+    
+    Rio_writen(toserverfd, FirstEightBytes, sizeof(FirstEightBytes));           // Send to the server secret key and type request
+    Rio_writen(toserverfd, SecondFifthteenBytes, sizeof(SecondFifthteenBytes)); // Send variable name
+    Rio_writen(toserverfd, ThirdForthBytes, sizeof(ThirdForthBytes));           // send length of value for variable
+    Rio_writen(toserverfd, Last100Bytes, sizeof(Last100Bytes));                 // Sends value of variable
 	
 //------------------------------------------------------------------------------
-    printf("Made it this far!!\n");
-        //rio_readnb(&rio, Report, MAXLINE);                                    // From the server
-        //fflush(stdout);
-    size_t n;
-    while((n = Rio_readn(toserverfd, Report, MAXLINE)) != 0) { //line:netp:echo:eof
-        printf("server received %d bytes\n", (int)n);
-    }
-    
-        //rio_readlineb(&rio, Report, MAXLINE);
-    printf("Report %s\n", *Report);
-      Close(toserverfd);
+    Close(toserverfd);                                                          //close connection
 	exit(0);
 }
