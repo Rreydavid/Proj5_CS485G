@@ -4,9 +4,9 @@
 //  21 April 2017
 
 // Known Issues:
-//					Line 44:  host to network long of 1 does not get seen by the server as 1 for "Get", sees "0" for set
-//					Line 60:  warning:  passing argument 1 of Rio_readn makes integer from pointer without a cast (compile time)
-//							  Rio_readin error: bad file descriptor (run time)
+//	
+//					Line 67:  Buffer may be uninitialized in this function (compile time)
+//							  SEGFAULT.
 
 
 
@@ -22,9 +22,11 @@ int main(int argc, char *argv[])
 	int ServerRequest1[2];
 	char *host;
 	int port;
-	char *buf[100];
+	int ReturnedValue;
+	char *buffer;
 	char *ServerRequest2[15] = {NULL};
 	unsigned long SecretKey;
+	int i;
 	rio_t rio;
 
 	// Check for proper amount of command line arguments
@@ -35,13 +37,14 @@ int main(int argc, char *argv[])
         exit(0);
 	}
 
+	// Assign the values into host and port
 	host = argv[1];
 	port = atoi(argv[2]);
 
 	// Build the first part of the server request with the security key and the request type
 	SecretKey = atoi(argv[3]);														//converts string secret key to unsigned long
     ServerRequest1[0] = htonl(SecretKey);                                           //converts secretkey to network order
-	ServerRequest1[1] = htonl(1);
+	ServerRequest1[1] = 1;
 
 	// Build the second part of the server request with the variable name
 	memcpy(ServerRequest2, argv[4], 14);
@@ -57,9 +60,14 @@ int main(int argc, char *argv[])
 	Rio_writen(toserverfd, ServerRequest2, sizeof(ServerRequest2));
 
 	// from the server
-	Rio_readn(&rio, buf, MAXLINE);
-	Fputs(*buf, stdout);
+	Rio_readnb(&rio, (void*)&ReturnedValue, 4);
 
+	for(i = 0; i < ReturnedValue + 1; i+= 1)
+	{
+		Rio_readnb(&rio, (void*)buffer, 100);
+		printf("%s\n", buffer);	
+	}
+	
 	Close(toserverfd);
 	exit(0);
 }
