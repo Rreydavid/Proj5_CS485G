@@ -23,7 +23,7 @@ void PrintMenu(int SecretKey, char *Type, char *VariableName, char *Status)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~Search~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-int Search(char *Record[MAXLINE], char *VariableName)
+int Search(&Record[MAXLINE][], char *VariableName)
 {
     int pos;
     
@@ -31,6 +31,7 @@ int Search(char *Record[MAXLINE], char *VariableName)
     {
         if(Record[pos] == NULL)
         {
+            printf("I worked!!!\n");                                              //DELETE!!!!!!!!!!!
             return -1;
         }
         else if(Record[pos] == VariableName)
@@ -38,6 +39,8 @@ int Search(char *Record[MAXLINE], char *VariableName)
             return pos+1;
         }
     }
+    
+    printf("I DIDNT work\n");                                                 //DELETE!!!!!!!!!!!
     return -1;
 }
 
@@ -45,14 +48,24 @@ int Search(char *Record[MAXLINE], char *VariableName)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Insert~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int Insert(char *Record[MAXLINE], int *RecordCount, char *VariableName, char *VariableValue, int pos)
 {
-    int
     if(pos == -1)
     {
-        Record[RecordCount] = VariableName;
-        Record[RecordCount+1] = VariableValue;
-        &RecordCount += 2;
+        Record[*RecordCount] = VariableName;
+        Record[*RecordCount+1] = VariableValue;
+        *RecordCount += 2;
+        
+        fprintf("Inside Insert -1 function: %c : %c", Record[*RecordCount], Record[*RecordCount+1]);
+        return 0;
     }
-    else if (pos )
+    else
+    {
+        Record[pos] = VariableValue;
+        
+        fprintf("Inside Insert else function: %s",Record[pos]);
+        return 0;
+    }
+    
+    return -1;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssGet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int simpleGet(char *MachineName, int TCPport, int SecretKey, char *variableName, char *value, int *resultLength)
@@ -91,7 +104,7 @@ int main(int argc, const char * argv[])
     char *VariableValue[100] = {NULL};
     char *Type;
     char *Status;
-    char *Record[MAXLINE]= {NULL};                                              //Initalized array to hold variables and values
+    char Record[MAXLINE][100];                                              //Initalized array to hold variables and values
     int RecordCount;
     int pos;
     int Sitrep;
@@ -130,25 +143,17 @@ int main(int argc, const char * argv[])
             Rio_readnb(&rio,VariableName, 15);                                  //reads in variable name
 
             Rio_readnb(&rio,(void*)&ValueLengthNet, 4);                         //Reads Variable length
-            fprintf(stdout, "Value Length[0] = %d \n", ValueLengthNet[0]);      //DELETE!!!!!!!!!!!!!!!!
-            fprintf(stdout, "Value Length before conversion = %d \n", ValueLengthNet);  //DELETE!!!!!!!!!!!!!!!!
             int VL = ntohl(ValueLengthNet[0]);                                  //Converts variable length from network to host
-             fprintf(stdout, "Value Length after conversion = %d \n", VL);      //DELETE!!!!!!!!!!!!!!!!
             
             Rio_readnb(&rio,VariableValue, VL);                                 //reads in variable value
-            printf("Variable Value %s\n", VariableValue);                       //DELETE!!!!!!!!!!!!!!!!
 
-            pos = Search(&Record[MAXLINE], VariableName);
+            pos = Search(Record, VariableName);
+            printf("Pos value %d\n", pos);                                //delete!!!!!!!!!!!!!!!
+
             
-            if(pos == -1)
-            {
-                Sitrep = Insert(&Record[MAXLINE], &RecordCount, VariableName, VariableValue, pos);  //add to end of array
-            }
-            else
-            {
-                Sitrep = Insert(&Record[MAXLINE], &RecordCount, VariableName, VariableValue, pos);  //replace current value
-            }
-        
+   
+            Sitrep = Insert(&Record[MAXLINE], &RecordCount, VariableName, VariableValue, pos);  //add to array
+            printf("Sitrep value %d\n", Sitrep);                                //delete!!!!!!!!!!!!!!!
             
             if(Sitrep == -1)
             {
@@ -159,6 +164,10 @@ int main(int argc, const char * argv[])
                 Status = "Success";
             }
             
+            printf("array %s\n", Record[0]);                       //DELETE!!!!!!!!!!!!!!!!
+            printf("array %s\n", Record[1]);                       //DELETE!!!!!!!!!!!!!!!!
+            printf("array %s\n", Record);                       //DELETE!!!!!!!!!!!!!!!!
+
             PrintMenu(SK, Type, VariableName, Status);                          //prints menu
         }
         
