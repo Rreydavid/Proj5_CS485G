@@ -1,14 +1,7 @@
 //  David Mercado, Patrick True
 //  CS485G Section 2
 //  Project 5 - ssGet.c
-//  21 April 2017
-
-// Known Issues:
-//	
-//					Line 67:  Buffer may be uninitialized in this function (compile time)
-//							  SEGFAULT.
-
-
+//  21 April 201
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,10 +16,11 @@ int main(int argc, char *argv[])
 	char *host;
 	int port;
 	int ReturnedValue;
-	char *buffer;
+	char *buffer[100] = {NULL};
 	char *ServerRequest2[15] = {NULL};
+	int caughtsize[1];
+	int ValueReturnLength;
 	unsigned long SecretKey;
-	int i;
 	rio_t rio;
 
 	// Check for proper amount of command line arguments
@@ -60,13 +54,22 @@ int main(int argc, char *argv[])
 	Rio_writen(toserverfd, ServerRequest2, sizeof(ServerRequest2));
 
 	// from the server
-	Rio_readnb(&rio, (void*)&ReturnedValue, 4);
+	// Catch the success or failure byte, 3 trash bytes
+	rio_readnb(&rio, (void*)&ReturnedValue, 4);
 
-	for(i = 0; i < ReturnedValue + 1; i+= 1)
+	if(ReturnedValue == -1)
 	{
-		Rio_readnb(&rio, (void*)buffer, 100);
-		printf("%s\n", buffer);	
+		printf("Failure.");
 	}
+
+	// Catch length of the value being returned
+	Rio_readnb(&rio, (void *)&caughtsize, 4);
+	// Network to Host order the returned length 
+	ValueReturnLength = ntohl(caughtsize[0]);
+
+	// Catch the actual returned value requested
+	Rio_readnb(&rio, buffer, ValueReturnLength);
+	printf("%s\n", buffer);	
 	
 	Close(toserverfd);
 	exit(0);
