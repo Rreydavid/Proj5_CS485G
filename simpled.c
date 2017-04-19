@@ -21,52 +21,13 @@ void PrintMenu(int SecretKey, char *Type, char *VariableName, char *Status)
     fprintf(stdout, "Operation Status = %s \n", Status);                        //displays sucess or failure
     fprintf(stdout, "-------------------------- \n");
 }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~Search~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-int Search(&Record[MAXLINE][], char *VariableName)
-{
-    int pos;
-    
-    for(pos = 0; pos < MAXLINE; pos += 2)
-    {
-        if(Record[pos] == NULL)
-        {
-            printf("I worked!!!\n");                                              //DELETE!!!!!!!!!!!
-            return -1;
-        }
-        else if(Record[pos] == VariableName)
-        {
-            return pos+1;
-        }
-    }
-    
-    printf("I DIDNT work\n");                                                 //DELETE!!!!!!!!!!!
-    return -1;
-}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Insert~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-int Insert(char *Record[MAXLINE], int *RecordCount, char *VariableName, char *VariableValue, int pos)
+/*int Insert(char *Record[MAXLINE], int *RecordCount, char *VariableName, char *VariableValue, int pos)
 {
-    if(pos == -1)
-    {
-        Record[*RecordCount] = VariableName;
-        Record[*RecordCount+1] = VariableValue;
-        *RecordCount += 2;
-        
-        fprintf("Inside Insert -1 function: %c : %c", Record[*RecordCount], Record[*RecordCount+1]);
-        return 0;
-    }
-    else
-    {
-        Record[pos] = VariableValue;
-        
-        fprintf("Inside Insert else function: %s",Record[pos]);
-        return 0;
-    }
-    
-    return -1;
-}
+ 
+}*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssGet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int simpleGet(char *MachineName, int TCPport, int SecretKey, char *variableName, char *value, int *resultLength)
 {
@@ -83,7 +44,8 @@ int main(int argc, const char * argv[])
     const int LISTEN_PORT = atoi(argv[1]);                                      //converts port to int (MIGHT CHANGE TO LONG)!!!!
     const unsigned long SECRET_KEY = atoi(argv[2]);                             //converts SecretKey to unsigned long
     const unsigned long LIMIT = 4294967296;                                     //(2^32-1) limit for SecretKey
-    
+    const int ROW = MAXLINE;
+    const int CHAR_LENGTH = 100;
 //------------------------------------------------------------------------------
     if(argc != 3)                                                               //checks for correct parameters
     {
@@ -97,17 +59,9 @@ int main(int argc, const char * argv[])
     }
     
 //------------------------------------------------------------------------------
-    int SecretKeyNet[1];                                                        // Declare Variables
-    int TypeRequest[1];
-    char *VariableName[15] = {NULL};
-    int ValueLengthNet[1];
-    char *VariableValue[100] = {NULL};
-    char *Type;
-    char *Status;
-    char Record[MAXLINE][100];                                              //Initalized array to hold variables and values
+    
+    char Record[ROW][CHAR_LENGTH];                                              //Initalized array to hold variables and values
     int RecordCount;
-    int pos;
-    int Sitrep;
     int listenfd;                                                               //for listening socket
     int connfd;                                                                 //for accept
     struct sockaddr_in clientAddr;                                              //socket address structure for the internet
@@ -120,6 +74,16 @@ int main(int argc, const char * argv[])
 //------------------------------------------------------------------------------
     while(1)                                                                    //continously listening for clients
     {
+        int SecretKeyNet[1];                                                     // Declare Variables
+        int TypeRequest[1];
+        char *VariableName[15] = {NULL};
+        int ValueLengthNet[1];
+        char *VariableValue[100] = {NULL};
+        char *Type;
+        char *Status;
+        int pos;
+        int Sitrep;
+        
         connfd = Accept(listenfd, (SA *)&clientAddr, &addrLength);              //accepts and creates a file descriptor for this connection
         
         Rio_readinitb(&rio,connfd);                                             //Creates internal buffer
@@ -142,18 +106,42 @@ int main(int argc, const char * argv[])
             Type = "set";
             Rio_readnb(&rio,VariableName, 15);                                  //reads in variable name
 
-            Rio_readnb(&rio,(void*)&ValueLengthNet, 4);                         //Reads Variable length
-            int VL = ntohl(ValueLengthNet[0]);                                  //Converts variable length from network to host
+            Rio_readnb(&rio,(void*)&ValueLengthNet, 4);                         //Reads Value length
+            int VL = ntohl(ValueLengthNet[0]);                                  //Converts Value length from network to host
             
             Rio_readnb(&rio,VariableValue, VL);                                 //reads in variable value
+            int compare;
+            int e;
+            for(e = 0; e < RecordCount+1; e += 2)                                   //Searching for Variable name
+            {
+                compare=strcmp(VariableName,Record[e]);
+                if(compare == 0)
+                {
+                    pos += 1;
+                    printf("Same value!!!\n");                                    //DELETE!!!!!!!!!!!
+                    break;
+                }
+            }
+            printf("Pos value: %d\n",pos);                                              //DELETE!!!!!!!!!!!
 
-            pos = Search(Record, VariableName);
-            printf("Pos value %d\n", pos);                                //delete!!!!!!!!!!!!!!!
+            if(pos > 0)                                                       //inserting new variable and value or update
+            {
+                printf("Im inside the pos>0\n");
+                memcpy(Record[pos], VariableValue, 99);
+                
+                fprintf("Inside Insert else function: %s", Record);
+                Sitrep=0;
+            }
+            else
+            {
+                printf("Im inside the else\n");
 
-            
-   
-            Sitrep = Insert(&Record[MAXLINE], &RecordCount, VariableName, VariableValue, pos);  //add to array
-            printf("Sitrep value %d\n", Sitrep);                                //delete!!!!!!!!!!!!!!!
+                memcpy(Record[RecordCount], VariableName, strlen(VariableName)+1);
+                memcpy(Record[RecordCount+1], VariableValue, VL+1);
+                RecordCount += 2;
+                fprintf("Inside Insert -1 function: %s : %s", Record[RecordCount], Record[RecordCount+1]);
+                Sitrep = 0;
+            }
             
             if(Sitrep == -1)
             {
@@ -164,11 +152,14 @@ int main(int argc, const char * argv[])
                 Status = "Success";
             }
             
-            printf("array %s\n", Record[0]);                       //DELETE!!!!!!!!!!!!!!!!
-            printf("array %s\n", Record[1]);                       //DELETE!!!!!!!!!!!!!!!!
-            printf("array %s\n", Record);                       //DELETE!!!!!!!!!!!!!!!!
+            int r;
+            for(r=0; r < RecordCount; r += 1)
+            {
+                printf("Record [%d]: %s\n",r, Record[r]);                       //DELETE!!!!!!!!!!!!!!!!
 
-            PrintMenu(SK, Type, VariableName, Status);                          //prints menu
+            }
+            
+            PrintMenu(SK, Type, VariableName, Status);                              //prints menu
         }
         
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
