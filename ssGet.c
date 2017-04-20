@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
     if(ReturnedStatus == -1)                                                    //if fails output message
 	{
-		printf("Failure.");
+		printf("Failure.\n");
 	}
     else
     {
