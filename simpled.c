@@ -81,8 +81,12 @@ int main(int argc, const char * argv[])
         char *VariableValue[100] = {NULL};
         char *Type;
         char *Status;
-        int pos;
+        int pos=0;
         int Sitrep;
+        int compare=0;
+        int VariableLen=0;
+        int e;
+
         
         connfd = Accept(listenfd, (SA *)&clientAddr, &addrLength);              //accepts and creates a file descriptor for this connection
         
@@ -95,7 +99,7 @@ int main(int argc, const char * argv[])
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if(SK != SECRET_KEY)
         {
-            fprintf(stdout, "Secret Key = %d \n", SK);                          //displays SecretKey provided by client
+            printf("Secret Key = %d \n", SK);                          //displays SecretKey provided by client
             Close(connfd);                                                      //closes connection to client
             continue;
         }
@@ -110,14 +114,17 @@ int main(int argc, const char * argv[])
             int VL = ntohl(ValueLengthNet[0]);                                  //Converts Value length from network to host
             
             Rio_readnb(&rio,VariableValue, VL);                                 //reads in variable value
-            int compare;
-            int e;
+            VariableLen= strlen(VariableName);
+            printf("My record Count prior to comparing: %d\n",RecordCount);
+            printf("My Compare Value prior to comparing: %d\n",compare);
+
             for(e = 0; e < RecordCount+1; e += 2)                                   //Searching for Variable name
             {
-                compare=strcmp(VariableName,Record[e]);
+                compare=strncmp(Record[e],VariableName,VariableLen);
+                printf("Compare value: %d\n",compare);
                 if(compare == 0)
                 {
-                    pos += 1;
+                    pos = e+1;
                     printf("Same value!!!\n");                                    //DELETE!!!!!!!!!!!
                     break;
                 }
@@ -129,7 +136,7 @@ int main(int argc, const char * argv[])
                 printf("Im inside the pos>0\n");
                 memcpy(Record[pos], VariableValue, 99);
                 
-                fprintf("Inside Insert else function: %s", Record);
+                printf("Inside Insert else function: %s\n", Record[pos]);
                 Sitrep=0;
             }
             else
@@ -139,7 +146,7 @@ int main(int argc, const char * argv[])
                 memcpy(Record[RecordCount], VariableName, strlen(VariableName)+1);
                 memcpy(Record[RecordCount+1], VariableValue, VL+1);
                 RecordCount += 2;
-                fprintf("Inside Insert -1 function: %s : %s", Record[RecordCount], Record[RecordCount+1]);
+                printf("RecordCount value : %d\n", RecordCount);
                 Sitrep = 0;
             }
             
@@ -165,8 +172,64 @@ int main(int argc, const char * argv[])
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         else if (TypeRequest[0] == 1)                                           //for ssGet client
         {
-            printf("Not ready yet");
+            Type = "get";
+            Rio_readnb(&rio,VariableName, 15);                                  //reads in variable name
+            
+            VariableLen= strlen(VariableName);
+            printf("My record Count prior to comparing: %d\n",RecordCount);
+            printf("My Compare Value prior to comparing: %d\n",compare);
+            
+            for(e = 0; e < RecordCount+1; e += 2)                                   //Searching for Variable name
+            {
+                compare=strncmp(Record[e],VariableName,VariableLen);
+                printf("Compare value: %d\n",compare);
+                if(compare == 0)
+                {
+                    pos = e+1;
+                    printf("Same value!!!\n");                                    //DELETE!!!!!!!!!!!
+                    break;
+                }
+            }
+            printf("Pos value: %d\n",pos);                                              //DELETE!!!!!!!!!!!
+            
+            if(pos > 0)                                                       //inserting new variable and value or update
+            {
+                printf("Im inside the pos>0\n");
+                int ValueLen = strlen(Record[pos]);
+                int ValueLenNet[1];
+                ValueLenNet[0]=htonl(ValueLen);
+                Rio_writen(connfd, ValueLenNet, 4);
+                Rio_writen(connfd, Record[pos], ValueLen);                                  // Sends value of variable
 
+                printf("Inside Insert else function: %s\n", Record[pos]);
+                Sitrep=0;
+            }
+            else
+            {
+                int Number= -1;
+                int ReturnFail[1];
+                ReturnFail[0]= htonl(Number);
+                Rio_writen(connfd, ReturnFail, 4);
+                Sitrep = -1;
+            }
+            
+            if(Sitrep == -1)
+            {
+                Status = "Failure";
+            }
+            else
+            {
+                Status = "Success";
+            }
+            
+            int r;
+            for(r=0; r < RecordCount; r += 1)
+            {
+                printf("Record [%d]: %s\n",r, Record[r]);                       //DELETE!!!!!!!!!!!!!!!!
+                
+            }
+            
+            PrintMenu(SK, Type, VariableName, Status);                              //prints menu
         }
         
         Close(connfd);                                                          //closes connection to client
