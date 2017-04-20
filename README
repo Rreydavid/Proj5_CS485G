@@ -59,11 +59,15 @@ The ssDigest client was tested against the good working server provided by Dr. F
 invalid port number, and an invalid secretkey.  Different values were provided to be encrypted, and then checked in bash to see if it appears to be
 done appropriately.  
 
-The ssRun client has not been tested yet.
+The ssRun client compiles, and has been tested.  However, the program experiences a connection reset.
 
 The simpled server was tested by using the good, working ssSet and ssGet clients provided by Dr. Finkel.  
 
 Known bugs:
+
+ssSet does not handle more than 1 word for the value.
+ssDigest client was working fine, but has since started getting its connection reset by peer.
+ssRun connection gets reset by peer.
 
 
 
