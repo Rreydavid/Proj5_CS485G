@@ -58,11 +58,11 @@ int main(int argc, char *argv[])
     Rio_writen(toserverfd, Last100Bytes, 100);                                  // Sends value of variable
 
     Rio_readnb(&rio,(void*)&ReturnedStatusNet, 4);
-    printf("This is my return before converstion: %d\n",ReturnedStatusNet[0]);
-
     ReturnedStatus = ntohl(ReturnedStatusNet[0]);
-    printf("This is my return response: %d\n",ReturnedStatus);
-    
+    if(ReturnedStatus == -1)
+    {
+        printf("Failure\n");
+    }
     Close(toserverfd);                                                          //close connection
 	exit(0);
 }

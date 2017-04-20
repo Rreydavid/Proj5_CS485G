@@ -54,15 +54,12 @@ int main(int argc, const char * argv[])
     }
     
 //------------------------------------------------------------------------------
-    
     char Record[ROW][CHAR_LENGTH];                                              //Initalized array to hold variables and values
     int RecordCount;
     int listenfd;                                                               //for listening socket
     int connfd;                                                                 //for accept
     struct sockaddr_in clientAddr;                                              //socket address structure for the internet
-    //    struct hostent *clientHostEntry;                                      //used to represent an entry in the hosts database
     rio_t rio;
-    
     listenfd = Open_listenfd(LISTEN_PORT);                                      //open and return a listening socket on port (bind)
     socklen_t addrLength = sizeof(clientAddr);                                  //holds the length of the clients address
     
@@ -98,9 +95,6 @@ int main(int argc, const char * argv[])
             continue;
         }
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        
-        
         //~~~~~~~~~~~~ssSET~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         else if (TypeRequest[0] == 0)                                           //for ssSet client
         {
@@ -112,56 +106,40 @@ int main(int argc, const char * argv[])
             
             Rio_readnb(&rio,VariableValue, VL);                                 //reads in variable value
             VariableLen= strlen(VariableName);
-            printf("My record Count prior to comparing: %d\n",RecordCount);     //DELETE!!!!!!!!
-            printf("My Compare Value prior to comparing: %d\n",compare);        //DELETE!!!!!!!!
             
             //===========================
             for(e = 0; e < RecordCount+1; e += 2)                               //Searching for Variable name
             {
                 compare=strncmp(Record[e],VariableName,VariableLen);
-                printf("Compare value: %d\n",compare);                          //DELETE!!!!!!!!
                 if(compare == 0)
                 {
                     pos = e+1;
-                    printf("Same value!!!\n");                                  //DELETE!!!!!!!!!!!
                     break;
                 }
             }
-            printf("Pos value: %d\n",pos);                                      //DELETE!!!!!!!!!!!
+            
             //===========================
-            if(pos > 0)                                                         //inserting new variable and value or update
+            if(pos > 0)                                                         //inserting new value
             {
-                printf("Im inside the pos>0\n");                                //DELETE!!!!!!!!
                 memcpy(Record[pos], VariableValue, 99);
-                printf("Inside Insert else function: %s\n", Record[pos]);       //DELETE!!!!!!!!
                 Status = "Success";
             }
+            
             //===========================
-            else
+            else                                                                //inserting new variable and value
             {
-                printf("Im inside the else\n");                                 //DELETE!!!!!!!!
                 memcpy(Record[RecordCount], VariableName, strlen(VariableName)+1);
                 memcpy(Record[RecordCount+1], VariableValue, VL+1);
                 RecordCount += 2;
-                printf("RecordCount value : %d\n", RecordCount);                //DELETE!!!!!!!!
                 Status = "Success";
             }
-            ReturnedStatusNet= 0;
-            printf("Returned Response before converting is: %d\n",ReturnedStatusNet);                   //DELETE!!!!!!!!
-            ReturnedStatus[0]= htonl(ReturnedStatusNet);
-            Rio_writen(connfd, (void*)&ReturnedStatus, 4);                                //Sends a 0 for success to client
-            printf("Returned Response is: %d\n",ReturnedStatus);                   //DELETE!!!!!!!!
-
-            int r;
-            for(r=0; r < RecordCount; r += 1)
-            {
-                printf("Record [%d]: %s\n",r, Record[r]);                       //DELETE!!!!!!!!!!!!!!!!
-            }
             
+            ReturnedStatusNet= 0;
+            ReturnedStatus[0]= htonl(ReturnedStatusNet);
+            Rio_writen(connfd, (void*)&ReturnedStatus, 4);                      //Sends a 0 for success to client
+
             PrintMenu(SK, Type, VariableName, Status);                          //prints menu
-
             Close(connfd);                                                      //closes connection to client
-
         }
         
         //~~~~~~~~~~ssGET~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,42 +147,32 @@ int main(int argc, const char * argv[])
         {
             Type = "get";
             Rio_readnb(&rio,VariableName, 15);                                  //reads in variable name
-            printf("My VariableName is: %s\n",VariableName);                    //DELETE!!!!!!!!
             
             VariableLen= strlen(VariableName);                                  //sets the length of the variable name
-            printf("My Variabel length is: %d\n",VariableLen);     //DELETE!!!!!!!!
-            printf("My record Count prior to comparing: %d\n",RecordCount);     //DELETE!!!!!!!!
-            printf("My Compare Value prior to comparing: %d\n",compare);        //DELETE!!!!!!!!
             
             //===========================
             for(e = 0; e < RecordCount+1; e += 2)                               //Searching for Variable name
             {
                 compare=strncmp(Record[e],VariableName,VariableLen);
-                printf("Compare value: %d\n",compare);                          //DELETE!!!!!!!!
                 if(compare == 0)
                 {
                     pos = e+1;
-                    printf("Same value!!!\n");                                  //DELETE!!!!!!!!!!!
                     break;
                 }
             }
-            printf("Pos value: %d\n",pos);                                      //DELETE!!!!!!!!!!!
             
             //===========================
             if(pos > 0)                                                         //inserting new variable and value or update
             {
                 ReturnedStatusNet= 0;
-                printf("Returned Response before converting is: %d\n",ReturnedStatusNet);                   //DELETE!!!!!!!!
                 ReturnedStatus[0]= htonl(ReturnedStatusNet);
-                Rio_writen(connfd, (void*)&ReturnedStatus, 4);                                //Sends a 0 for success to client
-                printf("Returned Response is: %d\n",ReturnedStatus);                   //DELETE!!!!!!!!
+                Rio_writen(connfd, (void*)&ReturnedStatus, 4);                  //Sends a 0 for success to client
                 
                 unsigned int ValueLen = strlen(Record[pos]);                    //getting length of the value
                 unsigned int ValueLenNet[1];
                 ValueLenNet[0]=htonl(ValueLen);                                 //converting it to network order
                 Rio_writen(connfd, ValueLenNet, 4);                             //sending length of value to client
                 Rio_writen(connfd, Record[pos], ValueLen);                      //Sends value of variable
-                printf("JUST SENT: %s\n", Record[pos]);                         //DELETE!!!!!!!!
                 
                 Status = "Success";
             }
@@ -213,20 +181,12 @@ int main(int argc, const char * argv[])
             else
             {
                 ReturnedStatusNet= -1;
-                printf("Returned Response before converting is: %d\n",ReturnedStatusNet);                   //DELETE!!!!!!!!
                 ReturnedStatus[0]= htonl(ReturnedStatusNet);
-                Rio_writen(connfd, (void*)&ReturnedStatus, 4);                                //Sends a 0 for success to client
-                printf("Returned Response is: %d\n",ReturnedStatus);                   //DELETE!!!!!!!!
+                Rio_writen(connfd, (void*)&ReturnedStatus, 4);                   //Sends a -1 for success to client
                 Status = "Failure";
-
             }
             
-            int r;                                                              //DELETE!!!!!!!!
-            for(r=0; r < RecordCount; r += 1)                                   //DELETE!!!!!!!!
-            {printf("Record [%d]: %s\n",r, Record[r]); }                      //DELETE!!!!!!!!!!!!!!!!
-            
             PrintMenu(SK, Type, VariableName, Status);                          //prints menu
-            
             Close(connfd);                                                      //closes connection to client
         }
         
@@ -236,9 +196,7 @@ int main(int argc, const char * argv[])
             Type = "digest";
             Status = "Failure";
 
-            
             PrintMenu(SK, Type, VariableName, Status);                          //prints menu
-
             Close(connfd);                                                      //closes connection to client
         }
         
@@ -249,12 +207,11 @@ int main(int argc, const char * argv[])
             Status = "Failure";
 
             PrintMenu(SK, Type, VariableName, Status);                          //prints menu
-            
             Close(connfd);                                                      //closes connection to client
         }
         
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else
+        else                                                                    //if request type is incorrect
         {
             fprintf(stderr, "Incorrect Request Type. Connection will now close...\n");
             Close(connfd);                                                      //closes connection to client
