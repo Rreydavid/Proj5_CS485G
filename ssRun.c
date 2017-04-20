@@ -28,16 +28,16 @@ int main(int argc, char *argv[])
 	if(argc != 5)
 	{
 		// If not 5 command line arguments, output to stderr with usage and values that were input.
-        fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <ProgramName> %s \n ", argv[1], argv[2], argv[3], argv[4]);
+        fprintf(stderr, "usage: <MachineName> <TCPport> <SecurityKey> <ProgramName> \n");
         exit(0);
 	}
-
-	if(argc[4] != "inet" || argc[4] != "hosts" || argc[4] != "uptime")
+	/*
+	if(argv[4] != "inet" || argc[4] != "hosts" || argc[4] != "uptime")
 	{
 		fprintf(stderr, "Accepted program names: inet, hosts, uptime");
 		exit(0);
 	}
-
+	*/
 	// Assign the values into host and port
 	host = argv[1];
 	port = atoi(argv[2]);
