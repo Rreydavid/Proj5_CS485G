@@ -1,0 +1,69 @@
+David Mercado, Patrick True
+CS 485G Section 4
+Project 5
+21 April 2017
+
+Files submitting in Project5 compressed file:
+ssSet.c
+ssGet.c
+ssDigest.c
+ssRun.c
+simpled.c
+Makefile
+README.txt
+
+Description: 
+
+This project is a group of 5 different programs, 4 clinets and 1 server.  The first one is a client called ssSet.  This program 
+requires 5 parameters in the command line.  These paramters are the name of the server to connect to, the port number, the secretkey, a 
+variable name, and a variable value.  The program connects to the provided server on the provided port, and sends the secretkey.  Next, 
+the variable name is sent with its value to be stored by the server.  The program gets the return value indicating success or failure, 
+with 3 bytes of padding, but only reports if the assignment failed.
+
+The second program is a client called ssGet.  This program requires 4 parameters in the command line.  These paramters are the name of the 
+server to connect to, the port number, the secretkey, and a variable name.  The program connects to the provided server on the provided port, 
+and sends the secretkey.  Next, the variable name is sent to the server to get the value of the variable.  The program gets the return value 
+indicating success or failure, with 3 bytes of padding, the size of the value to be returned, then the value itself.  The value is output 
+to the screen.
+
+The third program is a client called ssDigest.  This program requires 4 parameters in the command line.  These paramters are the name of 
+the server to connect to, the port number, the secretkey, and a value.  This value is sent to the server to be encrypted by mdsum5.  The 
+program gets the return value indicating success or failure, with 3 bytes of padding, the size of the value to be returned, and the encrypted
+value.  The value is output to the screen.
+
+The forth program is a clinet called ssRun.  This program requires 4 parameters in the command line.  These paramters are the name of the 
+server to connect to, the port number, the secretkey, and the name of a program.  The only accepted program names are:  inet, hosts, and 
+uptime.  The program connects to the provided server on the provided port, and sends the secretkey.  Next, the program name is sent to be 
+run on the server.  The program gets the return value indicating success or failure, with 3 bytes of padding, the size of the value to be 
+returned, and the encrypted value.  The value is output to the screen.
+
+The fifth program is the server called simpled.  This program requires 2 parameters in the command line. These parameters are the port number,
+and the secretkey key.  This program waits for a client to connect.  Each request sent to the server starts with the secretkey, a request type,
+and 3 bytes of padding.  If the secretkey sent to the server does not match the secretkey of the server, the port is closed.  If the 
+request type does not match the accepted values of 0, 1, 2 or 3, the port is closed.  Once these requirements are met, the server processes the
+command based on the request type, and returns the completion status and 3 bytes of padding to the client followed by the value, where
+applicable. 
+
+Testing: 
+
+The ssSet clinet was tested against the good working server provided by Dr. Finkel.  The program was tested with too few and too many arguments,
+invalid port number, and an invalid secretkey.  Next, we set variable names with specific values.  Then we set the variable names already provided
+to the server to new values.  
+
+The ssGet client was tested against the good working server provided by Dr. Finkel.  The program was tested with too few and too many arguments,
+invalid port number, and an invalid secretkey.  We used this client program in conjunction with ssSet to build a list of values stored on the
+server, to check the variable names for the appropriate value.  Then we gave the listed variables new values to make sure they would be 
+updated appropriately.  
+
+The ssDigest client was tested against the good working server provided by Dr. Finkel.  The program was tested with too few and too many arguments,
+invalid port number, and an invalid secretkey.  Different values were provided to be encrypted, and then checked in bash to see if it appears to be
+done appropriately.  
+
+The ssRun client has not been tested yet.
+
+The simpled server was tested by using the good, working ssSet and ssGet clients provided by Dr. Finkel.  
+
+Known bugs:
+
+
+
