@@ -1,7 +1,8 @@
 //  David Mercado, Patrick True
 //  CS485G Section 2
-//  Project 5 - ssGet.c
+//  Project 5
 //  21 April 201
+//  ssGet Client
 
 #include <stdio.h>
 #include <stdlib.h>

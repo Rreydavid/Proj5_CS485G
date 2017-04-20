@@ -1,8 +1,8 @@
 // David Mercado, Patrick True
-// CS485 Section 4
+// CS485G Section 4
 // Project 5
 // 21 April 2017
-// ssDigest Client
+// ssRun Client
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,8 +28,14 @@ int main(int argc, char *argv[])
 	if(argc != 5)
 	{
 		// If not 5 command line arguments, output to stderr with usage and values that were input.
-        fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <VariableName> %s \n ", argv[1], argv[2], argv[3], argv[4]);
+        fprintf(stderr, "usage: <MachineName> %s, <TCPport> %s, <SecurityKey> %s, <ProgramName> %s \n ", argv[1], argv[2], argv[3], argv[4]);
         exit(0);
+	}
+
+	if(argc[4] != "inet" || argc[4] != "hosts" || argc[4] != "uptime")
+	{
+		fprintf(stderr, "Accepted program names: inet, hosts, uptime");
+		exit(0);
 	}
 
 	// Assign the values into host and port

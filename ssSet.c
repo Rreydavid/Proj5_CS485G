@@ -1,8 +1,8 @@
 //  David Mercado, Patrick True
 //  CS485G Section 2
-//  Project 5 - ssSet.c
+//  Project 5
 //  21 April 2017
-//
+//  ssSet Client
 
 #include <stdio.h>
 #include <stdlib.h>
