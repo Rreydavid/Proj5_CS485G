@@ -1,8 +1,8 @@
 //  David Mercado, Patrick True
 //  CS485G Section 2
-//  Project 5
+//  Project 5 - ssSet.c
 //  21 April 2017
-//  ssSet Client
+//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
     unsigned int ThirdForthBytes[1];
     char *Last100Bytes[100] = {NULL};
     int toserverfd;
+    int ReturnedStatus;
+    int ReturnedStatusNet[1];
 	rio_t rio;
     
 //------------------------------------------------------------------------------
@@ -55,6 +57,12 @@ int main(int argc, char *argv[])
     Rio_writen(toserverfd, ThirdForthBytes, sizeof(ThirdForthBytes));           // send length of value for variable
     Rio_writen(toserverfd, Last100Bytes, 100);                                  // Sends value of variable
 
+    Rio_readnb(&rio,(void*)&ReturnedStatusNet, 4);
+    printf("This is my return before converstion: %d\n",ReturnedStatusNet[0]);
+
+    ReturnedStatus = ntohl(ReturnedStatusNet[0]);
+    printf("This is my return response: %d\n",ReturnedStatus);
+    
     Close(toserverfd);                                                          //close connection
 	exit(0);
 }

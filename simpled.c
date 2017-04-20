@@ -80,6 +80,8 @@ int main(int argc, const char * argv[])
         int compare=0;
         int VariableLen=0;
         int e;
+        int ReturnedStatusNet;
+        int ReturnedStatus[1];
         
         connfd = Accept(listenfd, (SA *)&clientAddr, &addrLength);              //accepts and creates a file descriptor for this connection
         
@@ -144,10 +146,11 @@ int main(int argc, const char * argv[])
                 printf("RecordCount value : %d\n", RecordCount);                //DELETE!!!!!!!!
                 Status = "Success";
             }
-   
-            char response = 0;                                              //MIGHT NEED TO SEND 3 ADDIOTIONAL BYTES OF PADDING
-            Rio_writen(connfd, response, 4);                                //Sends a 0 for success to client
-            printf("Returned Response is: %c\n",response);                   //DELETE!!!!!!!!
+            ReturnedStatusNet= 0;
+            printf("Returned Response before converting is: %d\n",ReturnedStatusNet);                   //DELETE!!!!!!!!
+            ReturnedStatus[0]= htonl(ReturnedStatusNet);
+            Rio_writen(connfd, (void*)&ReturnedStatus, 4);                                //Sends a 0 for success to client
+            printf("Returned Response is: %d\n",ReturnedStatus);                   //DELETE!!!!!!!!
 
             int r;
             for(r=0; r < RecordCount; r += 1)
@@ -190,9 +193,11 @@ int main(int argc, const char * argv[])
             //===========================
             if(pos > 0)                                                         //inserting new variable and value or update
             {
-                char response = 0;                                              //MIGHT NEED TO SEND 3 ADDIOTIONAL BYTES OF PADDING
-                Rio_writen(connfd, response, 4);                                //Sends a 0 for success to client
-                printf("Returned Response is: %c\n",response);                   //DELETE!!!!!!!!
+                ReturnedStatusNet= 0;
+                printf("Returned Response before converting is: %d\n",ReturnedStatusNet);                   //DELETE!!!!!!!!
+                ReturnedStatus[0]= htonl(ReturnedStatusNet);
+                Rio_writen(connfd, (void*)&ReturnedStatus, 4);                                //Sends a 0 for success to client
+                printf("Returned Response is: %d\n",ReturnedStatus);                   //DELETE!!!!!!!!
                 
                 unsigned int ValueLen = strlen(Record[pos]);                    //getting length of the value
                 unsigned int ValueLenNet[1];
@@ -207,9 +212,13 @@ int main(int argc, const char * argv[])
             //===========================
             else
             {
-                char response = -1;
-                Rio_writen(connfd, response, 4);                                //returns a -1 for failure
+                ReturnedStatusNet= -1;
+                printf("Returned Response before converting is: %d\n",ReturnedStatusNet);                   //DELETE!!!!!!!!
+                ReturnedStatus[0]= htonl(ReturnedStatusNet);
+                Rio_writen(connfd, (void*)&ReturnedStatus, 4);                                //Sends a 0 for success to client
+                printf("Returned Response is: %d\n",ReturnedStatus);                   //DELETE!!!!!!!!
                 Status = "Failure";
+
             }
             
             int r;                                                              //DELETE!!!!!!!!
