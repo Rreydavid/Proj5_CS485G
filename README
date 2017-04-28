@@ -69,5 +69,6 @@ ssSet does not handle more than 1 word for the value.
 ssDigest client was working fine, but has since started getting its connection reset by peer.
 ssRun connection gets reset by peer.
 
-
+We believe the data types sent between the server and client of our clients and server is not the same as those between
+Dr. Finkel's server and clients.  However, our server works with our clients.  
 

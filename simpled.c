@@ -11,7 +11,6 @@
 #include "csapp.h"      //for sockets and what not
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~PRINT MENU~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void PrintMenu(int SecretKey, char *Type, char *VariableName, char *Status)
 {
@@ -22,16 +21,6 @@ void PrintMenu(int SecretKey, char *Type, char *VariableName, char *Status)
     fprintf(stdout, "-------------------------- \n");
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
-
 
 
 int main(int argc, const char * argv[])
@@ -44,12 +33,12 @@ int main(int argc, const char * argv[])
 //------------------------------------------------------------------------------
     if(argc != 3)                                                               //checks for correct parameters
     {
-        fprintf(stderr, "Incorrect number of parameters: <port> %s <SecretKey> %s \n ", argv[1], argv[2]);
+        fprintf(stderr, "Incorrect number of parameters: <port> <SecretKey> \n ");
         exit(0);
     }
     else if ((LISTEN_PORT <= 0) || (SECRET_KEY <= 0) || (SECRET_KEY >= LIMIT))  //checks for port and sceret key to be within limits
     {
-        fprintf(stderr, "Incorrect Port or SecretKey Range!!: <port> %d <SecretKey> %ld \n ", LISTEN_PORT, SECRET_KEY);
+        fprintf(stderr, "Incorrect Port or SecretKey Range!!: <port> <SecretKey> \n ");
         exit(0);
     }
     
@@ -94,7 +83,7 @@ int main(int argc, const char * argv[])
             Close(connfd);                                                      //closes connection to client
             continue;
         }
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         //~~~~~~~~~~~~ssSET~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         else if (TypeRequest[0] == 0)                                           //for ssSet client
         {
